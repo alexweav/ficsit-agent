@@ -25,7 +25,8 @@ func New(l *log.Logger) *Agent {
 	}
 	collectors := collector.NewRunner(
 		collOps,
-		collector.NewPlayerInfo(url, client, prometheus.DefaultRegisterer, l),
+		collector.NewForPlayers(url, client, prometheus.DefaultRegisterer, l),
+		collector.NewForPower(url, client, prometheus.DefaultRegisterer, l),
 	)
 	api := api.New(l)
 	return &Agent{

@@ -13,15 +13,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-type PlayerInfo struct {
+type PlayerCollector struct {
 	baseURL *url.URL
 	client  http.Client
 	metrics *playerMetrics
 	log     *log.Logger
 }
 
-func NewPlayerInfo(url *url.URL, client http.Client, reg prometheus.Registerer, log *log.Logger) *PlayerInfo {
-	return &PlayerInfo{
+func NewForPlayers(url *url.URL, client http.Client, reg prometheus.Registerer, log *log.Logger) *PlayerCollector {
+	return &PlayerCollector{
 		baseURL: url,
 		client:  client,
 		metrics: newPlayerMetrics(reg),
@@ -58,7 +58,7 @@ type player struct {
 	Ping int64  `json:"PingTime"`
 }
 
-func (p *PlayerInfo) scrape(ctx context.Context) error {
+func (p *PlayerCollector) scrape(ctx context.Context) error {
 	uri := p.baseURL.JoinPath("/getPlayer")
 	req, err := http.NewRequest(http.MethodGet, uri.String(), nil)
 	if err != nil {

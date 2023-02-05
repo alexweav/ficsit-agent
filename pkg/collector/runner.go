@@ -32,7 +32,7 @@ func NewRunner(opts RunnerOpts, cs ...Collector) *Runner {
 	}
 }
 
-// Run starts the runner. It cannot be called concurrently.
+// Run starts the runner and blocks. It cannot be called concurrently.
 func (r *Runner) Run(ctx context.Context) error {
 	doneCh := make(chan bool) // TODO: not used, but we need a way to signal shutdowns eventually
 	errCh := make(chan error)
@@ -50,8 +50,7 @@ func (r *Runner) Run(ctx context.Context) error {
 					r.log.Println("Scraping a target...")
 					if err := c.scrape(ctx); err != nil {
 						// TODO, log and continue, no need for errCh, horrible hack
-						err = fmt.Errorf("failed to scrape a target: %w", err)
-						errCh <- err
+						errCh <- fmt.Errorf("failed to scrape a target: %w", err)
 						break
 					}
 				}
