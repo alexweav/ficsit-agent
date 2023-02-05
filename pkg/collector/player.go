@@ -31,6 +31,7 @@ func NewPlayerInfo(url *url.URL, client http.Client, reg prometheus.Registerer, 
 
 type playerMetrics struct {
 	Health *prometheus.GaugeVec
+	Ping   *prometheus.GaugeVec
 }
 
 func newPlayerMetrics(r prometheus.Registerer) *playerMetrics {
@@ -41,6 +42,12 @@ func newPlayerMetrics(r prometheus.Registerer) *playerMetrics {
 			Name:      "health",
 			Help:      "The current health of each player.",
 		}, []string{"name"}),
+		Ping: promauto.With(r).NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: "satisfactory",
+			Subsystem: "player",
+			Name:      "ping",
+			Help:      "The current ping time of the player in milliseconds.",
+		}, []string{"name"}),
 	}
 }
 
@@ -48,6 +55,7 @@ type player struct {
 	ID   string `json:"ID"`
 	Name string `json:"PlayerName"`
 	HP   int    `json:"PlayerHP"`
+	Ping int64  `json:"PingTime"`
 }
 
 func (p *PlayerInfo) scrape(ctx context.Context) error {
@@ -82,9 +90,11 @@ func (p *PlayerInfo) scrape(ctx context.Context) error {
 	}
 
 	p.metrics.Health.Reset()
+	p.metrics.Ping.Reset()
 	for _, pl := range players {
 		if pl.Name != "" {
 			p.metrics.Health.WithLabelValues(pl.Name).Set(float64(pl.HP))
+			p.metrics.Ping.WithLabelValues(pl.Name).Set(float64(pl.Ping))
 		}
 	}
 
