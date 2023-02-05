@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -38,22 +39,32 @@ func (r *Runner) Run(ctx context.Context) error {
 	errCh := make(chan error)
 
 	go func() {
+		var wg sync.WaitGroup
+
 		for {
 			select {
 			case <-doneCh:
 				close(errCh)
 				return
-			case <-r.ticker.C:
+			case t := <-r.ticker.C:
 				// TODO
+				r.log.Println("Running all scrapers...")
 				for _, c := range r.cs {
-					// TODO do not serialize scrapes, use waitgroup
-					r.log.Println("Scraping a target...")
-					if err := c.scrape(ctx); err != nil {
-						// TODO, log and continue, no need for errCh, horrible hack
-						errCh <- fmt.Errorf("failed to scrape a target: %w", err)
-						break
-					}
+					coll := c
+
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						if err := coll.scrape(ctx); err != nil {
+							// TODO, log and continue, no need for errCh, horrible hack
+							errCh <- fmt.Errorf("failed to scrape a target: %w", err)
+						}
+					}()
+
 				}
+
+				wg.Wait()
+				r.log.Printf("All scrapers for tick %v finished", t)
 			}
 		}
 	}()
