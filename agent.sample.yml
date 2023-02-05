@@ -1,0 +1,18 @@
+server:
+  log_level: debug
+  http_listen_port: 12345
+
+metrics:
+  global:
+    scrape_interval: 10s
+  configs:
+    - name: node-exporter-fpe
+      scrape_configs:
+        - job_name: node-exporter
+          static_configs:
+            - targets: ['host.docker.internal:1234']
+      remote_write:
+        - url: <PROM-URL>
+          basic_auth:
+            username: <PROM-BASIC-AUTH-USER>
+            password: <PROM-BASIC-AUTH-PASS>

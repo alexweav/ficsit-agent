@@ -1,0 +1,12 @@
+version: '3'
+services:
+
+  grafana-agent:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    image: grafana/agent:latest
+    volumes:
+      - ./data/agent:/etc/agent/data
+      - ./agent.yml:/etc/agent/agent.yaml
+    ports:
+      - "12345:12345"
