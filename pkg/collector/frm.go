@@ -18,17 +18,21 @@ type FRMClient struct {
 	logger log.Logger
 }
 
-func NewFRMClient(url *url.URL, l log.Logger) FRMClient {
-	return FRMClient{
-		url: url,
+func NewFRMClient(baseURL string, l log.Logger) (*FRMClient, error) {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, err
+	}
+	return &FRMClient{
+		url: u,
 		client: http.Client{
 			Timeout: 30 * time.Second,
 		},
 		logger: l,
-	}
+	}, nil
 }
 
-func (c FRMClient) GetJSON(ctx context.Context, uri string, into any) error {
+func (c *FRMClient) GetJSON(ctx context.Context, uri string, into any) error {
 	url := c.url.JoinPath(uri)
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {

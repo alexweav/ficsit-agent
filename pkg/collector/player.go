@@ -10,12 +10,12 @@ import (
 )
 
 type PlayerCollector struct {
-	client  FRMClient
+	client  *FRMClient
 	metrics *playerMetrics
 	log     log.Logger
 }
 
-func NewForPlayers(client FRMClient, reg prometheus.Registerer, logger log.Logger) *PlayerCollector {
+func NewForPlayers(client *FRMClient, reg prometheus.Registerer, logger log.Logger) *PlayerCollector {
 	return &PlayerCollector{
 		client:  client,
 		metrics: newPlayerMetrics(reg),

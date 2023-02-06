@@ -10,12 +10,12 @@ import (
 )
 
 type PowerCollector struct {
-	client  FRMClient
+	client  *FRMClient
 	metrics *powerMetrics
 	log     log.Logger
 }
 
-func NewForPower(client FRMClient, reg prometheus.Registerer, logger log.Logger) *PowerCollector {
+func NewForPower(client *FRMClient, reg prometheus.Registerer, logger log.Logger) *PowerCollector {
 	return &PowerCollector{
 		client:  client,
 		metrics: newPowerMetrics(reg),

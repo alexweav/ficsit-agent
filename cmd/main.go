@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"flag"
 	"net/url"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/alexweav/ficsit-agent/pkg/agent"
 	"github.com/go-kit/log"
@@ -15,11 +15,15 @@ func main() {
 	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 
-	cfg := agent.Config{
-		ScrapeInterval: 10 * time.Second,
-		ModURL:         baseURL(),
+	flags := flag.NewFlagSet("ficsit-agent", flag.PanicOnError)
+	cfg := agent.Config{}
+	cfg.RegisterFlags(flags)
+	flags.Parse(os.Args[1:])
+
+	agent, err := agent.New(cfg, logger)
+	if err != nil {
+		logger.Log("msg", "Failed to initialize agent", "error", err)
 	}
-	agent := agent.New(cfg, logger)
 
 	inter := make(chan os.Signal, 1)
 	signal.Notify(inter, os.Interrupt)
