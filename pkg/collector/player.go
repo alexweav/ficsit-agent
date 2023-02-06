@@ -52,10 +52,10 @@ func newPlayerMetrics(r prometheus.Registerer) *playerMetrics {
 }
 
 type player struct {
-	ID   string `json:"ID"`
-	Name string `json:"PlayerName"`
-	HP   int    `json:"PlayerHP"`
-	Ping int64  `json:"PingTime"`
+	ID   string  `json:"ID"`
+	Name string  `json:"PlayerName"`
+	HP   float64 `json:"PlayerHP"`
+	Ping int64   `json:"PingTime"`
 }
 
 func (p *PlayerCollector) scrape(ctx context.Context) error {
@@ -93,7 +93,7 @@ func (p *PlayerCollector) scrape(ctx context.Context) error {
 	p.metrics.Ping.Reset()
 	for _, pl := range players {
 		if pl.Name != "" {
-			p.metrics.Health.WithLabelValues(pl.Name).Set(float64(pl.HP))
+			p.metrics.Health.WithLabelValues(pl.Name).Set(pl.HP)
 			p.metrics.Ping.WithLabelValues(pl.Name).Set(float64(pl.Ping))
 		}
 	}
