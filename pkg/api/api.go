@@ -16,7 +16,7 @@ type API struct {
 
 func New(l log.Logger) *API {
 	return &API{
-		log: log.With(l, "component", "api"),
+		log: l,
 		srv: http.Server{
 			Addr:         "127.0.0.1:1234",
 			ReadTimeout:  30 * time.Second,

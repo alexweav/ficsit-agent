@@ -11,6 +11,7 @@ import (
 
 func main() {
 	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 
 	agent := agent.New(logger)
 

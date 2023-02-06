@@ -25,7 +25,7 @@ func NewForPower(url *url.URL, client http.Client, reg prometheus.Registerer, lo
 		baseURL: url,
 		client:  client,
 		metrics: newPowerMetrics(reg),
-		log:     log.With(logger, "component", "collector.power"),
+		log:     logger,
 	}
 }
 

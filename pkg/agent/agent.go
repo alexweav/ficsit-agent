@@ -21,7 +21,7 @@ func New(l log.Logger) *Agent {
 	client := newDefaultClient()
 	collOps := collector.RunnerOpts{
 		ScrapeInterval: 10 * time.Second,
-		Log:            log.With(l, "component", "collector"),
+		Log:            l,
 	}
 	collectors := collector.NewRunner(
 		collOps,

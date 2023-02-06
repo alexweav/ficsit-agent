@@ -25,7 +25,7 @@ func NewForPlayers(url *url.URL, client http.Client, reg prometheus.Registerer, 
 		baseURL: url,
 		client:  client,
 		metrics: newPlayerMetrics(reg),
-		log:     log.With(logger, "component", "collector.player"),
+		log:     logger,
 	}
 }
 
