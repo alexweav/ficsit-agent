@@ -17,16 +17,15 @@ type Agent struct {
 }
 
 func New(l log.Logger) *Agent {
-	url := baseURL()
-	client := newDefaultClient()
+	client := collector.NewFRMClient(l)
 	collOps := collector.RunnerOpts{
 		ScrapeInterval: 10 * time.Second,
 		Log:            l,
 	}
 	collectors := collector.NewRunner(
 		collOps,
-		collector.NewForPlayers(url, client, prometheus.DefaultRegisterer, l),
-		collector.NewForPower(url, client, prometheus.DefaultRegisterer, l),
+		collector.NewForPlayers(client, prometheus.DefaultRegisterer, l),
+		collector.NewForPower(client, prometheus.DefaultRegisterer, l),
 	)
 	api := api.New(l)
 	return &Agent{

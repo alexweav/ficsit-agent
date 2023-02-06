@@ -2,11 +2,7 @@ package collector
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
@@ -14,15 +10,13 @@ import (
 )
 
 type PowerCollector struct {
-	baseURL *url.URL
-	client  http.Client
+	client  FRMClient
 	metrics *powerMetrics
 	log     log.Logger
 }
 
-func NewForPower(url *url.URL, client http.Client, reg prometheus.Registerer, logger log.Logger) *PowerCollector {
+func NewForPower(client FRMClient, reg prometheus.Registerer, logger log.Logger) *PowerCollector {
 	return &PowerCollector{
-		baseURL: url,
 		client:  client,
 		metrics: newPowerMetrics(reg),
 		log:     logger,
@@ -103,34 +97,10 @@ type network struct {
 }
 
 func (p *PowerCollector) scrape(ctx context.Context) error {
-	uri := p.baseURL.JoinPath("/getPower")
-	req, err := http.NewRequest(http.MethodGet, uri.String(), nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-	req = req.WithContext(ctx)
-
-	p.log.Log("msg", "Executing request", "url", uri.String())
-	resp, err := p.client.Do(req)
-	if resp != nil {
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				p.log.Log("msg", "Failed to close response body", "err", err)
-			}
-		}()
-	}
-	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("error reading response: %w", err)
-	}
 	networks := make([]network, 0)
-	err = json.Unmarshal(data, &networks)
+	err := p.client.GetJSON(ctx, "/getPower", &networks)
 	if err != nil {
-		return fmt.Errorf("error deserializing response: %w", err)
+		return fmt.Errorf("error fetching power data: %w", err)
 	}
 
 	p.metrics.reset()
