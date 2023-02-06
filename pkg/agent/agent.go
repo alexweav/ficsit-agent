@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/alexweav/ficsit-agent/pkg/api"
@@ -10,16 +11,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+type Config struct {
+	ScrapeInterval time.Duration
+	ModURL         *url.URL
+}
+
 type Agent struct {
 	log        log.Logger
 	api        *api.API
 	collectors *collector.Runner
 }
 
-func New(l log.Logger) *Agent {
-	client := collector.NewFRMClient(l)
+func New(cfg Config, l log.Logger) *Agent {
+	client := collector.NewFRMClient(cfg.ModURL, l)
 	collOps := collector.RunnerOpts{
-		ScrapeInterval: 10 * time.Second,
+		ScrapeInterval: cfg.ScrapeInterval,
 		Log:            l,
 	}
 	collectors := collector.NewRunner(

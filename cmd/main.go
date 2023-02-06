@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"net/url"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/alexweav/ficsit-agent/pkg/agent"
 	"github.com/go-kit/log"
@@ -13,7 +15,11 @@ func main() {
 	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC, "caller", log.DefaultCaller)
 
-	agent := agent.New(logger)
+	cfg := agent.Config{
+		ScrapeInterval: 10 * time.Second,
+		ModURL:         baseURL(),
+	}
+	agent := agent.New(cfg, logger)
 
 	inter := make(chan os.Signal, 1)
 	signal.Notify(inter, os.Interrupt)
@@ -33,5 +39,9 @@ func main() {
 		logger.Log("msg", "Exiting...")
 		os.Exit(0)
 	}
+}
 
+func baseURL() *url.URL {
+	url, _ := url.Parse("http://localhost:8080")
+	return url
 }

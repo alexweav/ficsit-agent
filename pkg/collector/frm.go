@@ -18,9 +18,9 @@ type FRMClient struct {
 	logger log.Logger
 }
 
-func NewFRMClient(l log.Logger) FRMClient {
+func NewFRMClient(url *url.URL, l log.Logger) FRMClient {
 	return FRMClient{
-		url: baseURL(),
+		url: url,
 		client: http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -59,9 +59,4 @@ func (c FRMClient) GetJSON(ctx context.Context, uri string, into any) error {
 	}
 
 	return nil
-}
-
-func baseURL() *url.URL {
-	url, _ := url.Parse("http://localhost:8080")
-	return url
 }
