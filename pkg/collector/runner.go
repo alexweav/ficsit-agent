@@ -3,9 +3,10 @@ package collector
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
+
+	"github.com/go-kit/log"
 )
 
 type Collector interface {
@@ -14,14 +15,14 @@ type Collector interface {
 
 type RunnerOpts struct {
 	ScrapeInterval time.Duration
-	Log            *log.Logger
+	Log            log.Logger
 }
 
 type Runner struct {
 	opts   RunnerOpts
 	cs     []Collector
 	ticker *time.Ticker
-	log    *log.Logger
+	log    log.Logger
 }
 
 func NewRunner(opts RunnerOpts, cs ...Collector) *Runner {
@@ -29,7 +30,7 @@ func NewRunner(opts RunnerOpts, cs ...Collector) *Runner {
 		opts:   opts,
 		cs:     cs,
 		ticker: time.NewTicker(opts.ScrapeInterval),
-		log:    opts.Log,
+		log:    log.With(opts.Log, "component", "collector"),
 	}
 }
 
@@ -48,7 +49,7 @@ func (r *Runner) Run(ctx context.Context) error {
 				return
 			case t := <-r.ticker.C:
 				// TODO
-				r.log.Println("Running all scrapers...")
+				r.log.Log("msg", "Running all scrapers...")
 				for _, c := range r.cs {
 					coll := c
 
@@ -64,7 +65,7 @@ func (r *Runner) Run(ctx context.Context) error {
 				}
 
 				wg.Wait()
-				r.log.Printf("All scrapers for tick %v finished", t)
+				r.log.Log("msg", "All scrapers for tick finished", "tick", t)
 			}
 		}
 	}()

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -17,15 +17,15 @@ type PowerCollector struct {
 	baseURL *url.URL
 	client  http.Client
 	metrics *powerMetrics
-	log     *log.Logger
+	log     log.Logger
 }
 
-func NewForPower(url *url.URL, client http.Client, reg prometheus.Registerer, log *log.Logger) *PowerCollector {
+func NewForPower(url *url.URL, client http.Client, reg prometheus.Registerer, logger log.Logger) *PowerCollector {
 	return &PowerCollector{
 		baseURL: url,
 		client:  client,
 		metrics: newPowerMetrics(reg),
-		log:     log,
+		log:     log.With(logger, "component", "collector.power"),
 	}
 }
 
@@ -110,12 +110,12 @@ func (p *PowerCollector) scrape(ctx context.Context) error {
 	}
 	req = req.WithContext(ctx)
 
-	p.log.Printf("executing request to %s", uri.String())
+	p.log.Log("msg", "Executing request", "url", uri.String())
 	resp, err := p.client.Do(req)
 	if resp != nil {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				p.log.Fatalf("failed to close response body: %s", err.Error())
+				p.log.Log("msg", "Failed to close response body", "err", err)
 			}
 		}()
 	}

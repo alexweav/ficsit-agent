@@ -2,21 +2,21 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type API struct {
-	log *log.Logger
+	log log.Logger
 	srv http.Server
 }
 
-func New(l *log.Logger) *API {
+func New(l log.Logger) *API {
 	return &API{
-		log: l,
+		log: log.With(l, "component", "api"),
 		srv: http.Server{
 			Addr:         "127.0.0.1:1234",
 			ReadTimeout:  30 * time.Second,

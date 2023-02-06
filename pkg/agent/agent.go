@@ -2,26 +2,26 @@ package agent
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/alexweav/ficsit-agent/pkg/api"
 	"github.com/alexweav/ficsit-agent/pkg/collector"
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Agent struct {
-	log        *log.Logger
+	log        log.Logger
 	api        *api.API
 	collectors *collector.Runner
 }
 
-func New(l *log.Logger) *Agent {
+func New(l log.Logger) *Agent {
 	url := baseURL()
 	client := newDefaultClient()
 	collOps := collector.RunnerOpts{
 		ScrapeInterval: 10 * time.Second,
-		Log:            l,
+		Log:            log.With(l, "component", "collector"),
 	}
 	collectors := collector.NewRunner(
 		collOps,

@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 
 	"github.com/alexweav/ficsit-agent/pkg/agent"
+	"github.com/go-kit/log"
 )
 
 func main() {
-	l := log.New(os.Stdout, "", 0)
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 
-	agent := agent.New(l)
+	agent := agent.New(logger)
 
 	inter := make(chan os.Signal, 1)
 	signal.Notify(inter, os.Interrupt)
@@ -25,11 +25,11 @@ func main() {
 	select {
 	case err := <-errCh:
 		if err != nil {
-			l.Fatalf("exited with fatal error: %s", err.Error())
+			logger.Log("msg", "Exited with fatal error", "error", err)
 		}
 	// Not great, doesn't wait on anything to close
 	case <-inter:
-		l.Println("Exiting...")
+		logger.Log("msg", "Exiting...")
 		os.Exit(0)
 	}
 

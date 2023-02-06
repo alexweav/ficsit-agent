@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -17,15 +17,15 @@ type PlayerCollector struct {
 	baseURL *url.URL
 	client  http.Client
 	metrics *playerMetrics
-	log     *log.Logger
+	log     log.Logger
 }
 
-func NewForPlayers(url *url.URL, client http.Client, reg prometheus.Registerer, log *log.Logger) *PlayerCollector {
+func NewForPlayers(url *url.URL, client http.Client, reg prometheus.Registerer, logger log.Logger) *PlayerCollector {
 	return &PlayerCollector{
 		baseURL: url,
 		client:  client,
 		metrics: newPlayerMetrics(reg),
-		log:     log,
+		log:     log.With(logger, "component", "collector.player"),
 	}
 }
 
@@ -66,12 +66,12 @@ func (p *PlayerCollector) scrape(ctx context.Context) error {
 	}
 	req = req.WithContext(ctx)
 
-	p.log.Printf("executing request to %s", uri.String())
+	p.log.Log("msg", "Executing request", "url", uri.String())
 	resp, err := p.client.Do(req)
 	if resp != nil {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				p.log.Fatalf("failed to close response body: %s", err.Error())
+				p.log.Log("msg", "Failed to close response body", "err", err)
 			}
 		}()
 	}
@@ -97,8 +97,6 @@ func (p *PlayerCollector) scrape(ctx context.Context) error {
 			p.metrics.Ping.WithLabelValues(pl.Name).Set(float64(pl.Ping))
 		}
 	}
-
-	p.log.Printf("%v", players)
 
 	return nil
 }
