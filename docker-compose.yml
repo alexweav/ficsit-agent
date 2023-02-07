@@ -10,3 +10,11 @@ services:
       - ./agent.yml:/etc/agent/agent.yaml
     ports:
       - "12345:12345"
+
+  ficsit-agent:
+    build: .
+    command: -scrape-interval=10s -frm-url="http://host.docker.internal:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "1234:1234"

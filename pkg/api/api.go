@@ -18,7 +18,7 @@ func New(l log.Logger) *API {
 	return &API{
 		log: l,
 		srv: http.Server{
-			Addr:         "127.0.0.1:1234",
+			Addr:         "0.0.0.0:1234",
 			ReadTimeout:  30 * time.Second,
 			WriteTimeout: 30 * time.Second,
 		},
