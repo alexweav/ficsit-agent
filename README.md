@@ -17,4 +17,4 @@ We depend on the [Ficsit Remote Monitoring](https://ficsit.app/mod/FicsitRemoteM
 We use [Grafana Agent](https://grafana.com/docs/agent/latest/) to forward data to an external Prometheus instance.
 
 1. Copy `agent.sample.yml` to `agent.yml` and configure your Prometheus server's remote write URL and auth info.
-2. `docker compose up`
+2. `docker compose -f docker-compose.external.yml up`
